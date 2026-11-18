@@ -1,0 +1,1082 @@
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مغامرة علم المال: من المقايضة إلى النقود</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+        }
+        .emerald-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        .npc-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #fbbf24;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: #0f172a;
+            font-weight: 800;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fbbf24; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- Top Navigation & Status Bar -->
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-700/80 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl floating">🪙</span>
+                <div>
+                    <h1 class="text-xl font-black text-amber-400">أكاديمية علم المال</h1>
+                    <p class="text-xs text-slate-300">رحلة تفاعلية من المقايضة إلى النقد</p>
+                </div>
+            </div>
+
+            <!-- Stage Navigation Pills -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700" id="nav-tabs">
+                <button onclick="goToStage(0)" class="nav-btn px-3 py-1.5 rounded-lg text-sm transition-all tab-active">١. المفاهيم</button>
+                <button onclick="goToStage(1)" class="nav-btn px-3 py-1.5 rounded-lg text-sm transition-all text-slate-300 hover:text-white">٢. لعبة المقايضة</button>
+                <button onclick="goToStage(2)" class="nav-btn px-3 py-1.5 rounded-lg text-sm transition-all text-slate-300 hover:text-white">٣. عيوب المقايضة</button>
+                <button onclick="goToStage(3)" class="nav-btn px-3 py-1.5 rounded-lg text-sm transition-all text-slate-300 hover:text-white">٤. وظائف النقود</button>
+                <button onclick="goToStage(4)" class="nav-btn px-3 py-1.5 rounded-lg text-sm transition-all text-slate-300 hover:text-white">٥. الاختبار النهائي</button>
+            </nav>
+
+            <!-- Player Score & Audio Toggle -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
+                    <span class="text-xl">💰</span>
+                    <div>
+                        <span class="text-xs text-amber-200 block">ثروتك المعرفية</span>
+                        <span id="score-display" class="font-black text-amber-400 text-lg">0</span>
+                        <span class="text-xs text-amber-400">دينار</span>
+                    </div>
+                </div>
+                <button id="sound-toggle" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xl transition" title="تشغيل/إيقاف الصوت">
+                    🔊
+                </button>
+            </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 mt-3 rounded-full overflow-hidden">
+            <div id="progress-bar" class="gold-gradient h-full transition-all duration-500" style="width: 15%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- ================= SCREEN 0: WELCOME & CONCEPTS ================= -->
+        <section id="stage-0" class="stage-section space-y-6">
+            <div class="text-center space-y-3 mb-8">
+                <span class="px-4 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-semibold border border-amber-500/30">المرحلة الأولى: التأسيس</span>
+                <h2 class="text-3xl md:text-5xl font-black text-white">مدخل إلى علم المال: <span class="text-amber-400">التمول، المال، والنقد</span></h2>
+                <p class="text-slate-300 max-w-2xl mx-auto text-base md:text-lg">
+                    غالباً ما نستخدم كلمات "المال" و"النقد" وكأنهما شيء واحد! لكن في علم الاقتصاد والشريعة، لكل مصطلح معنى دقيق. ادرس البطاقات التالية ثم العب لعبة التصنيف.
+                </p>
+            </div>
+
+            <!-- Interactive Concept Cards -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Card 1: التمول -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-blue-400 hover:bg-slate-800/60 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center text-3xl mb-4 border border-blue-500/30">🏦</div>
+                        <h3 class="text-2xl font-bold text-blue-400 mb-2">١. التموّل (الإحراز)</h3>
+                        <p class="text-slate-200 text-sm leading-relaxed mb-4">
+                            هو <strong>الفعل أو السلوك</strong> البشري؛ أي اتخاذ الشيء مالاً، وادخاره، وحيازته وقت الحاجة للانتفاع به.
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700 text-xs text-slate-300">
+                        💡 <strong>مثال:</strong> قيامك بادخار القمح في الصومعة أو حفظ الذهب في الخزنة يُسمى "تموّلاً".
+                    </div>
+                </div>
+
+                <!-- Card 2: المال -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-emerald-400 hover:bg-slate-800/60 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-3xl mb-4 border border-emerald-500/30">🐪</div>
+                        <h3 class="text-2xl font-bold text-emerald-400 mb-2">٢. المال (الثروة العينية)</h3>
+                        <p class="text-slate-200 text-sm leading-relaxed mb-4">
+                            هو <strong>كل ما له قيمة مادية</strong> بين الناس ويميلون إليه ويمكن حيازته، سواء كان عقاراً، ثياباً، ماشية، أو نقوداً.
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700 text-xs text-slate-300">
+                        💡 <strong>قاعدة ذهبية:</strong> كل نقد هو مال، وليس كل مال نقداً! (السيارة مال، لكنها ليست نقداً).
+                    </div>
+                </div>
+
+                <!-- Card 3: النقد -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-amber-400 hover:bg-slate-800/60 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center text-3xl mb-4 border border-amber-500/30">💵</div>
+                        <h3 class="text-2xl font-bold text-amber-400 mb-2">٣. النقد (العملة)</h3>
+                        <p class="text-slate-200 text-sm leading-relaxed mb-4">
+                            هو <strong>وسيط التبادل</strong> الذي يلقى قبولاً عاماً في المجتمع لإبراء الذمم وتقييم السلع (كالدنانير الذهبية والأوراق النقدية).
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700 text-xs text-slate-300">
+                        💡 <strong>مثال:</strong> الريال، الدينار، الدولار، والعملات الرقمية المعتمدة.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini-Game 1: Classifier -->
+            <div class="glass-card rounded-2xl p-6 mt-8 border border-amber-500/40">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                            <span>🎮</span> تحدي التصنيف السريع: هل هذا مال أم نقد أم تموّل؟
+                        </h3>
+                        <p class="text-sm text-slate-300">صنّف العناصر التالية في الصندوق الصحيح لتربح الدنانير وتفتح المرحلة التالية!</p>
+                    </div>
+                    <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-600 text-sm">
+                        المتبقي: <span id=" classifier-remaining" class="font-bold text-amber-400">6</span> عناصر
+                    </div>
+                </div>
+
+                <!-- Current Item to Classify -->
+                <div id="classifier-play-area" class="text-center py-6 bg-slate-900/70 rounded-2xl border border-slate-700 mb-6">
+                    <p class="text-xs text-slate-400 mb-2">العنصر الحالي:</p>
+                    <div id="current-classify-item" class="text-2xl md:text-3xl font-black text-white mb-6 px-4">
+                        🏠 منزل سكني تملكه العائلة
+                    </div>
+                    
+                    <div class="flex flex-wrap justify-center gap-4 px-4">
+                        <button onclick="checkClassification('tamawwul')" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2">
+                            <span>🏦</span> عملية تموّل
+                        </button>
+                        <button onclick="checkClassification('mal')" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow-lg shadow-emerald-600/30 flex items-center gap-2">
+                            <span>🐪</span> مال (وليس نقداً)
+                        </button>
+                        <button onclick="checkClassification('naqd')" class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition shadow-lg shadow-amber-500/30 flex items-center gap-2">
+                            <span>💵</span> نقد (ومال أيضاً)
+                        </button>
+                    </div>
+                    <p id="classifier-feedback" class="mt-4 text-sm font-semibold h-6"></p>
+                </div>
+
+                <div id="stage-0-next" class="hidden text-center">
+                    <button onclick="goToStage(1)" class="gold-gradient text-slate-950 font-black px-8 py-4 rounded-xl text-lg shadow-xl hover:scale-105 transition flex items-center gap-3 mx-auto">
+                        <span>انتقل إلى سوق المقايضة التاريخي</span>
+                        <span>⬅️</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 1: BARTER SIMULATOR GAME ================= -->
+        <section id="stage-1" class="stage-section hidden space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-4 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-semibold border border-emerald-500/30">المرحلة الثانية: محاكاة تاريخية</span>
+                <h2 class="text-3xl md:text-4xl font-black text-white">سوق المقايضة القديم 🏺</h2>
+                <p class="text-slate-300 max-w-2xl mx-auto text-sm md:text-base">
+                    قبل اختراع النقود، كان الناس يتبادلون السلع مباشرة (سلعة بسلعة) وهو ما يُعرف بـ <strong>المقايضة</strong>. جرب بنفسك مدى صعوبة الحصول على ما تريد في هذا السوق!
+                </p>
+            </div>
+
+            <!-- Game HUD -->
+            <div class="grid md:grid-cols-3 gap-4">
+                <!-- Player Inventory -->
+                <div class="glass-card p-5 rounded-2xl border-2 border-amber-500/50 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400 block">ما تملكه الآن في حقيبتك:</span>
+                        <h4 id="player-item-name" class="text-2xl font-black text-amber-400 mt-1">🐟 سمكة طازجة</h4>
+                    </div>
+                    <div id="player-item-icon" class="text-5xl bg-slate-800 p-3 rounded-2xl border border-slate-700">🐟</div>
+                </div>
+
+                <!-- Target Goal -->
+                <div class="glass-card p-5 rounded-2xl border-2 border-emerald-500/50 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400 block">هدفك النهائي لعائلتك:</span>
+                        <h4 class="text-2xl font-black text-emerald-400 mt-1">🧥 ثوب صوفي دافئ</h4>
+                    </div>
+                    <div class="text-5xl bg-slate-800 p-3 rounded-2xl border border-slate-700">🧥</div>
+                </div>
+
+                <!-- Moves & Hint -->
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-center">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-slate-300">عدد محاولات التبادل:</span>
+                        <span id="barter-steps" class="font-black text-xl text-white">0</span>
+                    </div>
+                    <p id="barter-log" class="text-xs text-amber-300 bg-slate-900/90 p-2.5 rounded-lg border border-slate-700">
+                        💬 ابحث عن تاجر يقبل السمك لتبدأ سلسلة المبادلات!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Market Merchants Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                <!-- Merchant 1: Tailor -->
+                <div onclick="attemptTrade('tailor')" class="npc-card glass-card p-5 rounded-2xl cursor-pointer transition-all flex flex-col justify-between border border-slate-700">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-4xl">🧔🏻‍♂️</span>
+                            <span class="text-xs bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-full border border-purple-500/30">الخياط</span>
+                        </div>
+                        <h4 class="font-bold text-lg text-white mb-1">العم صالح الخياط</h4>
+                        <p class="text-xs text-slate-400 mb-4">"أصنع أدفأ الثياب، لكني جائع وأحتاج للخبز أو القمح ولا أحب السمك!"</p>
+                    </div>
+                    <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">يعطيك:</span>
+                            <span class="font-bold text-emerald-400">🧥 ثوب صوفي</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-800 pt-2">
+                            <span class="text-slate-400">يطلب:</span>
+                            <span class="font-bold text-amber-400">🌾 كيس قمح</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant 2: Farmer -->
+                <div onclick="attemptTrade('farmer')" class="npc-card glass-card p-5 rounded-2xl cursor-pointer transition-all flex flex-col justify-between border border-slate-700">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-4xl">👨🏽‍🌾</span>
+                            <span class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-500/30">المزارع</span>
+                        </div>
+                        <h4 class="font-bold text-lg text-white mb-1">أبو حارث المزارع</h4>
+                        <p class="text-xs text-slate-400 mb-4">"لدي قمح وفير، لكني أحتاج فأساً حديدية لحصاد أرضي."</p>
+                    </div>
+                    <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">يعطيك:</span>
+                            <span class="font-bold text-emerald-400">🌾 كيس قمح</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-800 pt-2">
+                            <span class="text-slate-400">يطلب:</span>
+                            <span class="font-bold text-amber-400">🪓 فأس حديدية</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant 3: Blacksmith -->
+                <div onclick="attemptTrade('blacksmith')" class="npc-card glass-card p-5 rounded-2xl cursor-pointer transition-all flex flex-col justify-between border border-slate-700">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-4xl">🧔🏾‍♂️</span>
+                            <span class="text-xs bg-red-500/20 text-red-300 px-2.5 py-1 rounded-full border border-red-500/30">الحداد</span>
+                        </div>
+                        <h4 class="font-bold text-lg text-white mb-1">شداد الحداد</h4>
+                        <p class="text-xs text-slate-400 mb-4">"العمل أمام النار متعب! أريد حطباً لأشعل فرني وأصهر الحديد."</p>
+                    </div>
+                    <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">يعطيك:</span>
+                            <span class="font-bold text-emerald-400">🪓 فأس حديدية</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-800 pt-2">
+                            <span class="text-slate-400">يطلب:</span>
+                            <span class="font-bold text-amber-400">🪵 حزمة حطب</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant 4: Woodcutter -->
+                <div onclick="attemptTrade('woodcutter')" class="npc-card glass-card p-5 rounded-2xl cursor-pointer transition-all flex flex-col justify-between border border-slate-700">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-4xl">👴🏼</span>
+                            <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-500/30">الحطّاب</span>
+                        </div>
+                        <h4 class="font-bold text-lg text-white mb-1">العم مسعود الحطّاب</h4>
+                        <p class="text-xs text-slate-400 mb-4">"جمعت الكثير من الحطب من الغابة، وأشتهي وجبة سمك طازجة للغداء!"</p>
+                    </div>
+                    <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">يعطيك:</span>
+                            <span class="font-bold text-emerald-400">🪵 حزمة حطب</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-800 pt-2">
+                            <span class="text-slate-400">يطلب:</span>
+                            <span class="font-bold text-amber-400">🐟 سمكة طازجة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barter Victory Banner -->
+            <div id="barter-victory" class="hidden glass-card p-6 rounded-2xl border-2 border-emerald-400 text-center space-y-4 bg-emerald-950/40">
+                <div class="text-5xl">🎉🧥🎉</div>
+                <h3 class="text-2xl font-black text-emerald-300">أحسنت! حصلت على الثوب الصوفي بعد ٤ مبادلات مرهقة!</h3>
+                <p class="text-slate-200 max-w-2xl mx-auto text-sm">
+                    لاحظت كم استغرق الأمر من جهد؟ كان عليك البحث عن شخص يريد ما تملكه ويملك ما تريده، وهو ما يسميه الاقتصاديون <strong>"صعوبة توافق الرغبات"</strong>. دعنا نستكشف باقي عيوب المقايضة!
+                </p>
+                <button onclick="goToStage(2)" class="gold-gradient text-slate-950 font-black px-8 py-3 rounded-xl shadow-xl hover:scale-105 transition">
+                    اكتشف عيوب المقايضة الأربعة ⬅️
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 2: DEFECTS OF BARTER ================= -->
+        <section id="stage-2" class="stage-section hidden space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-4 py-1 rounded-full bg-red-500/20 text-red-300 text-sm font-semibold border border-red-500/30">المرحلة الثالثة: التحليل الاقتصادي</span>
+                <h2 class="text-3xl md:text-4xl font-black text-white">لماذا فشل نظام المقايضة؟ (عيوب المقايضة)</h2>
+                <p class="text-slate-300 max-w-2xl mx-auto text-sm md:text-base">
+                    مع توسع المجتمعات وتنوع السلع، أصبحت المقايضة عائقاً أمام التجارة بسبب <strong>أربعة عيوب رئيسية</strong>. اقرأ المشكلات من اليمين واختر العيب العلمي المناسب لها من اليسار!
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 items-start">
+                <!-- Scenarios List -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-amber-400 text-lg mb-2">١. اختر موقفاً من السوق القديم:</h3>
+                    
+                    <div onclick="selectDefectScenario(0)" id="scen-0" class="scen-card glass-card p-4 rounded-xl cursor-pointer border-2 border-amber-400 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🐪➗🐓</span>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">الموقف الأول: مشكلة الجمل والدجاجة!</h4>
+                                <p class="text-xs text-slate-300 mt-1">أحمد يملك جملاً ويريد شراء دجاجة واحدة فقط للعشاء، لكن الجمل يساوي ١٠٠ دجاجة ولا يمكن ذبح الجمل لأخذ جزء صغير منه وإلا مات وفقد قيمته!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="selectDefectScenario(1)" id="scen-1" class="scen-card glass-card p-4 rounded-xl cursor-pointer border border-slate-700 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🍅🦠⏳</span>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">الموقف الثاني: محصول الطماطم الصيفي</h4>
+                                <p class="text-xs text-slate-300 mt-1">مزارع أنتج أطناناً من الطماطم ويريد ادخار ثروته لتزويج ابنه بعد خمس سنوات، لكن الطماطم ستتعفن وتفسد خلال أسبوع واحد!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="selectDefectScenario(2)" id="scen-2" class="scen-card glass-card p-4 rounded-xl cursor-pointer border border-slate-700 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">⚖️🤯📜</span>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">الموقف الثالث: تاجر القرية الحائر</h4>
+                                <p class="text-xs text-slate-300 mt-1">في السوق ١٠٠ سلعة مختلفة. التاجر مضطر لحفظ قيمة كل سلعة مقابل كل السلع الأخرى (كم حذاء يساوي القميص؟ وكم سمكة؟ وكم لتراً من الزيت؟ آلاف المعادلات!).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="selectDefectScenario(3)" id="scen-3" class="scen-card glass-card p-4 rounded-xl cursor-pointer border border-slate-700 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🔄🚶‍♂️🌾</span>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">الموقف الرابع: البحث الطويل المرهق</h4>
+                                <p class="text-xs text-slate-300 mt-1">خالد معه تمر ويريد حذاءً، فوجد صانع الأحذية لكن صانع الأحذية يريد عسلاً ولا يريد تمراً!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scientific Defects Choices -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-700 space-y-4">
+                    <h3 class="font-bold text-emerald-400 text-lg mb-2">٢. ما هو العيب الاقتصادي الذي يمثله هذا الموقف؟</h3>
+                    <p id="selected-scen-prompt" class="text-xs text-amber-200 bg-slate-900 p-3 rounded-lg border border-slate-700">
+                        👈 أنت تحلل الآن: <strong>الموقف الأول (مشكلة الجمل والدجاجة)</strong>
+                    </p>
+
+                    <div class="space-y-3">
+                        <button onclick="matchDefect(0)" id="def-btn-0" class="w-full text-right p-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 transition flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-white block">عدم قابلية بعض السلع للتجزئة</span>
+                                <span class="text-xs text-slate-400">السلع الكبيرة كالمواشي تفقد قيمتها إذا قُسّمت لأجزاء صغيرة.</span>
+                            </div>
+                            <span class="text-2xl">🧩</span>
+                        </button>
+
+                        <button onclick="matchDefect(1)" id="def-btn-1" class="w-full text-right p-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 transition flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-white block">صعوبة خزن القيمة (تلف السلع وتكلفة التخزين)</span>
+                                <span class="text-xs text-slate-400">المواد الغذائية والزراعية تتعرض للتلف وتحتاج مخازن ضخمة.</span>
+                            </div>
+                            <span class="text-2xl">🏚️</span>
+                        </button>
+
+                        <button onclick="matchDefect(2)" id="def-btn-2" class="w-full text-right p-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 transition flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-white block">غياب وحدة قياس مشتركة لتقييم السلع</span>
+                                <span class="text-xs text-slate-400">تعدد نسب التبادل بشكل معقد جداً مع زيادة عدد السلع.</span>
+                            </div>
+                            <span class="text-2xl">📏</span>
+                        </button>
+
+                        <button onclick="matchDefect(3)" id="def-btn-3" class="w-full text-right p-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 transition flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-white block">صعوبة تحقيق التوافق المزدوج للرغبات</span>
+                                <span class="text-xs text-slate-400">ندرة مصادفة شخص يملك ما أريد ويرغب فيما أملك في نفس الوقت.</span>
+                            </div>
+                            <span class="text-2xl">🤝</span>
+                        </button>
+                    </div>
+
+                    <p id="defect-feedback" class="text-center font-bold text-sm h-6"></p>
+                </div>
+            </div>
+
+            <div id="stage-2-next" class="hidden text-center pt-4">
+                <button onclick="goToStage(3)" class="gold-gradient text-slate-950 font-black px-8 py-4 rounded-xl text-lg shadow-xl hover:scale-105 transition">
+                    كيف حلّت النقود هذه المشاكل؟ (وظائف النقود) ⬅️
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 3: FUNCTIONS OF MONEY ================= -->
+        <section id="stage-3" class="stage-section hidden space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-4 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-semibold border border-amber-500/30">المرحلة الرابعة: ميلاد النقد</span>
+                <h2 class="text-3xl md:text-4xl font-black text-white">البطل المنقذ: وظائف النقود الأساسية 🪙</h2>
+                <p class="text-slate-300 max-w-2xl mx-auto text-sm md:text-base">
+                    جاءت النقود لتقضي تماماً على عيوب المقايضة الأربعة! لكل عيب من عيوب المقايضة، ظهرت <strong>وظيفة أساسية للنقود</strong>.
+                </p>
+            </div>
+
+            <!-- 4 Functions Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl border-t-4 border-t-amber-400">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <h3 class="font-bold text-lg text-amber-400 mb-1">١. وسيط للتبادل</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        تبيع سلعتك بالنقود، ثم تشتري بالنقود ما تشاء من أي شخص. (قضت على مشكلة توافق الرغبات).
+                    </p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-t-4 border-t-emerald-400">
+                    <div class="text-3xl mb-2">⚖️</div>
+                    <h3 class="font-bold text-lg text-emerald-400 mb-1">٢. مقياس للقيمة</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        وحدة حساب تقاس بها قيم جميع السلع والخدمات بسهولة (هذا الكتاب بـ ١٠ دنانير، وهذه السيارة بـ ١٠٠٠٠).
+                    </p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-t-4 border-t-blue-400">
+                    <div class="text-3xl mb-2">🔐</div>
+                    <h3 class="font-bold text-lg text-blue-400 mb-1">٣. مخزن للقيمة (أداة ادخار)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        يمكن حفظ النقود لإنفاقها في المستقبل دون أن تتعفن كالطماطم أو تحتاج لمستودعات ضخمة.
+                    </p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-t-4 border-t-purple-400">
+                    <div class="text-3xl mb-2">📅</div>
+                    <h3 class="font-bold text-lg text-purple-400 mb-1">٤. معيار للمدفوعات الآجلة</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        تستخدم لتسوية الديون والعقود المستقبلية والرواتب والأقساط بدقة وعدالة.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Interactive Case Study Game -->
+            <div class="glass-card p-6 rounded-2xl border border-amber-500/40 mt-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <span>🕵️‍♂️</span> مختبر الوظائف: أي وظيفة للنقود تعمل في هذا الموقف؟
+                </h3>
+
+                <div class="bg-slate-900/90 p-6 rounded-xl border border-slate-700 text-center space-y-5">
+                    <p id="func-question-text" class="text-lg md:text-xl font-bold text-amber-300">
+                        "دخلتَ متجراً إلكترونياً فوجدت الهاتف مكتوباً تحته (السعر: ٢٠٠٠ ريال) والسمّاعة (٢٠٠ ريال)، فعرفت فوراً أن الهاتف يعادل ١٠ سماعات."
+                    </p>
+
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <button onclick="checkMoneyFunction('medium')" class="p-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 font-bold transition border border-slate-600">
+                            🔄 وسيط للتبادل
+                        </button>
+                        <button onclick="checkMoneyFunction('measure')" class="p-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 font-bold transition border border-slate-600">
+                            ⚖️ مقياس للقيمة (وحدة حساب)
+                        </button>
+                        <button onclick="checkMoneyFunction('store')" class="p-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 font-bold transition border border-slate-600">
+                            🔐 مخزن للقيمة
+                        </button>
+                        <button onclick="checkMoneyFunction('deferred')" class="p-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 font-bold transition border border-slate-600">
+                            📅 معيار للمدفوعات الآجلة
+                        </button>
+                    </div>
+
+                    <p id="func-feedback" class="text-sm font-bold h-6"></p>
+                </div>
+
+                <div id="stage-3-next" class="hidden text-center mt-6">
+                    <button onclick="goToStage(4)" class="gold-gradient text-slate-950 font-black px-8 py-4 rounded-xl text-lg shadow-xl hover:scale-105 transition">
+                        استعد للاختبار النهائي الكبرى! 🏆 ⬅️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 4: FINAL QUIZ SHOWDOWN ================= -->
+        <section id="stage-4" class="stage-section hidden space-y-6">
+            <div id="quiz-container" class="glass-card p-6 md:p-8 rounded-2xl border border-amber-500/40 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase">التحدي الختامي</span>
+                        <h2 class="text-2xl font-black text-white">اختبار خبير علم المال 🎓</h2>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-xs text-slate-400 block">السؤال</span>
+                        <span id="quiz-progress" class="text-xl font-black text-amber-400">1 / 6</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 id="quiz-question" class="text-xl md:text-2xl font-bold text-white leading-relaxed mb-6">
+                        جاري تحميل السؤال...
+                    </h3>
+                    <div id="quiz-options" class="space-y-3">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <div id="quiz-explanation" class="hidden p-4 rounded-xl bg-slate-900 border border-slate-700 text-sm text-slate-200 mb-4"></div>
+
+                <button id="next-quiz-btn" onclick="nextQuizQuestion()" class="hidden w-full gold-gradient text-slate-950 font-black py-3.5 rounded-xl shadow-lg hover:opacity-95 transition">
+                    السؤال التالي ⬅️
+                </button>
+            </div>
+
+            <!-- Final Certificate / Victory Screen -->
+            <div id="certificate-screen" class="hidden glass-card p-8 rounded-3xl border-2 border-amber-400 text-center max-w-2xl mx-auto space-y-6 relative overflow-hidden">
+                <div class="text-6xl floating">👑</div>
+                <div class="space-y-2">
+                    <span class="px-4 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/40">شهادة إتمام الجدارة الاقتصادية</span>
+                    <h2 class="text-3xl md:text-4xl font-black text-white">مبارك! أنت الآن فقيهٌ في علم المال</h2>
+                    <p class="text-slate-300 text-sm">لقد أتقنت مفاهيم التمول، المال، النقد، المقايضة وعيوبها، ووظائف النقود.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-700 max-w-md mx-auto">
+                    <div>
+                        <span class="text-xs text-slate-400 block">إجمالي الثروة المعرفية</span>
+                        <span id="final-score" class="text-3xl font-black text-amber-400">0</span>
+                        <span class="text-xs text-amber-400">دينار ذهبي</span>
+                    </div>
+                    <div class="border-r border-slate-700 pr-4">
+                        <span class="text-xs text-slate-400 block">نتيجة الاختبار النهائي</span>
+                        <span id="final-quiz-accuracy" class="text-3xl font-black text-emerald-400">6/6</span>
+                        <span class="text-xs text-emerald-400 block">إجابات صحيحة</span>
+                    </div>
+                </div>
+
+                <!-- Summary Cheat Sheet -->
+                <div class="text-right bg-slate-900/60 p-4 rounded-xl border border-slate-700 text-xs space-y-2 text-slate-300">
+                    <h4 class="font-bold text-amber-400 text-sm mb-2">📌 ملخص الدرس السريع للمراجعة:</h4>
+                    <p>• <strong>التموّل:</strong> فعل الادخار والاقتناء. | <strong>المال:</strong> كل ذي قيمة مادية. | <strong>النقد:</strong> وسيط التبادل المقبول عاماً.</p>
+                    <p>• <strong>المقايضة:</strong> مبادلة سلعة بسلعة دون نقود.</p>
+                    <p>• <strong>عيوب المقايضة:</strong> صعوبة توافق الرغبات، عدم قابلية التجزئة، صعوبة خزن القيمة، غياب مقياس موحد للقيمة.</p>
+                    <p>• <strong>وظائف النقود:</strong> وسيط للتبادل، مقياس للقيمة، مخزن للقيمة، معيار للمدفوعات الآجلة.</p>
+                </div>
+
+                <button onclick="resetFullGame()" class="px-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-600 transition">
+                    🔄 إعادة الرحلة من البداية
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80 mt-auto">
+        صُمم كدرس تفاعلي تعليمي ممتع حول مدخل علم المال والاقتصاد الإسلامي
+    </footer>
+
+    <!-- ================= JAVASCRIPT LOGIC & AUDIO ENGINE ================= -->
+    <script>
+        // --- Web Audio API Sound Synthesizer ---
+        let soundEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, now); // B5
+                osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'fanfare') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.type = 'triangle';
+                    o.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    g.gain.setValueAtTime(0.25, now + idx * 0.1);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+                    o.start(now + idx * 0.1);
+                    o.stop(now + idx * 0.1 + 0.35);
+                });
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
+        }
+
+        // --- Global State ---
+        let score = 0;
+        let currentStage = 0;
+
+        function addScore(points) {
+            score += points;
+            const scoreEl = document.getElementById('score-display');
+            scoreEl.innerText = score;
+            scoreEl.classList.add('scale-125');
+            setTimeout(() => scoreEl.classList.remove('scale-125'), 200);
+            playSound('coin');
+        }
+
+        function goToStage(stageIndex) {
+            currentStage = stageIndex;
+            document.querySelectorAll('.stage-section').forEach((sec, idx) => {
+                sec.classList.toggle('hidden', idx !== stageIndex);
+            });
+            document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+                if (idx === stageIndex) {
+                    btn.className = 'nav-btn px-3 py-1.5 rounded-lg text-sm transition-all tab-active';
+                } else {
+                    btn.className = 'nav-btn px-3 py-1.5 rounded-lg text-sm transition-all text-slate-300 hover:text-white';
+                }
+            });
+            const progressWidths = ['20%', '40%', '60%', '80%', '100%'];
+            document.getElementById('progress-bar').style.width = progressWidths[stageIndex];
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ================= STAGE 0: CLASSIFIER MINI-GAME =================
+        const classifyItems = [
+            { text: "🏠 منزل سكني تملكه العائلة", type: "mal", hint: "المنزل له قيمة مادية فهو (مال)، لكنه ليس وسيط تبادل عام فليس (نقداً)." },
+            { text: "💵 ورقة نقدية من فئة ١٠٠ ريال", type: "naqd", hint: "العملات الورقية هي (نقد) لأنها وسيط تبادل مقبول، وهي أيضاً جزء من المال!" },
+            { text: "🌾 قيام المزارع بتخزين الحبوب وادخارها لوقت الحاجة", type: "tamawwul", hint: "فعل الحيازة والادخار والاقتناء يُسمى في الفقه والاقتصاد (التموّل)." },
+            { text: "🐪 قطيع من الإبل والأغنام", type: "mal", hint: "المواشي ثروة عينية لها قيمة فهي (مال) وليست نقداً." },
+            { text: "🪙 دينار ذهبي مضروب للتداول في الأسواق", type: "naqd", hint: "الدنانير الذهبية المسكوكة هي (نقد) يُشترى به ويُقاس به الأثمان." },
+            { text: "🔐 اتخاذ الإنسان للذهب والفضة ذخيرةً للمستقبل", type: "tamawwul", hint: "سلوك اتخاذ الشيء مالاً وادخاره هو (التموّل)." }
+        ];
+        let currentClassifyIndex = 0;
+
+        function updateClassifierUI() {
+            const remEl = document.getElementById(' classifier-remaining');
+            if (currentClassifyIndex < classifyItems.length) {
+                remEl.innerText = classifyItems.length - currentClassifyIndex;
+                document.getElementById('current-classify-item').innerText = classifyItems[currentClassifyIndex].text;
+            } else {
+                remEl.innerText = '0';
+                document.getElementById('classifier-play-area').innerHTML = `
+                    <div class="text-4xl mb-2">🌟</div>
+                    <h4 class="text-xl font-black text-emerald-400">أحسنت! فرّقت ببراعة بين التموّل والمال والنقد!</h4>
+                    <p class="text-xs text-slate-300 mt-1">أصبحت جاهزاً لدخول سوق المقايضة التاريخي.</p>
+                `;
+                document.getElementById('stage-0-next').classList.remove('hidden');
+                playSound('fanfare');
+            }
+        }
+
+        function checkClassification(chosenType) {
+            if (currentClassifyIndex >= classifyItems.length) return;
+            const current = classifyItems[currentClassifyIndex];
+            const fb = document.getElementById('classifier-feedback');
+            const itemBox = document.getElementById('current-classify-item');
+
+            if (chosenType === current.type) {
+                addScore(20);
+                fb.className = "mt-4 text-sm font-semibold h-6 text-emerald-400";
+                fb.innerText = "✅ إجابة صحيحة! " + current.hint;
+                currentClassifyIndex++;
+                setTimeout(() => {
+                    fb.innerText = "";
+                    updateClassifierUI();
+                }, 1300);
+            } else {
+                playSound('error');
+                itemBox.classList.add('shake');
+                setTimeout(() => itemBox.classList.remove('shake'), 400);
+                fb.className = "mt-4 text-sm font-semibold h-6 text-red-400";
+                fb.innerText = "❌ فكر مجدداً: تذكر أن التمول (فعل الادخار)، المال (سلعة ذات قيمة)، النقد (عملة التبادل).";
+            }
+        }
+
+        // ================= STAGE 1: BARTER SIMULATOR =================
+        let playerInventory = { id: 'fish', name: '🐟 سمكة طازجة', icon: '🐟' };
+        let barterStepsCount = 0;
+
+        const merchants = {
+            woodcutter: {
+                wants: 'fish',
+                gives: { id: 'wood', name: '🪵 حزمة حطب', icon: '🪵' },
+                successMsg: 'الحطاب مسعود أخذ السمكة بسعادة وأعطاك حزمة حطب!',
+                failMsg: 'الحطاب يقول: "أنا لا أحتاج هذا! أحضر لي سمكة طازجة للغداء."'
+            },
+            blacksmith: {
+                wants: 'wood',
+                gives: { id: 'axe', name: '🪓 فأس حديدية', icon: '🪓' },
+                successMsg: 'الحداد شداد أخذ الحطب لفرنه وأعطاك فأساً حديدية متينة!',
+                failMsg: 'الحداد يقول: "فرني سينطفئ! لا أقبل إلا حزمة حطب."'
+            },
+            farmer: {
+                wants: 'axe',
+                gives: { id: 'wheat', name: '🌾 كيس قمح', icon: '🌾' },
+                successMsg: 'المزارع أبو حارث فرح بالفأس الحديدية وأعطاك كيس قمح ممتاز!',
+                failMsg: 'المزارع يقول: "أحتاج فأساً حديدية لحصاد أرضي أولاً!"'
+            },
+            tailor: {
+                wants: 'wheat',
+                gives: { id: 'coat', name: '🧥 ثوب صوفي دافئ', icon: '🧥' },
+                successMsg: 'الخياط صالح أخذ كيس القمح وأعطاك الثوب الصوفي الدافئ!',
+                failMsg: 'الخياط يقول: "أنا جائع! أحضر لي كيس قمح لأصنع الخبز وأعطيك الثوب."'
+            }
+        };
+
+        function attemptTrade(merchantKey) {
+            const m = merchants[merchantKey];
+            const logEl = document.getElementById('barter-log');
+            barterStepsCount++;
+            document.getElementById('barter-steps').innerText = barterStepsCount;
+
+            if (playerInventory.id === m.wants) {
+                playerInventory = m.gives;
+                document.getElementById('player-item-name').innerText = playerInventory.name;
+                document.getElementById('player-item-icon').innerText = playerInventory.icon;
+                logEl.className = "text-xs text-emerald-300 bg-emerald-950/80 p-2.5 rounded-lg border border-emerald-600";
+                logEl.innerText = "✅ " + m.successMsg;
+                addScore(30);
+
+                if (playerInventory.id === 'coat') {
+                    playSound('fanfare');
+                    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                    document.getElementById('barter-victory').classList.remove('hidden');
+                }
+            } else {
+                playSound('error');
+                logEl.className = "text-xs text-red-300 bg-red-950/80 p-2.5 rounded-lg border border-red-600 shake";
+                logEl.innerText = "❌ " + m.failMsg;
+                setTimeout(() => logEl.classList.remove('shake'), 400);
+            }
+        }
+
+        // ================= STAGE 2: DEFECTS OF BARTER =================
+        let activeScenario = 0;
+        let solvedScenarios = [false, false, false, false];
+        const scenarioTitles = [
+            "الموقف الأول (مشكلة الجمل والدجاجة)",
+            "الموقف الثاني (محصول الطماطم الصيفي)",
+            "الموقف الثالث (تاجر القرية الحائر)",
+            "الموقف الرابع (البحث الطويل المرهق)"
+        ];
+
+        function selectDefectScenario(idx) {
+            activeScenario = idx;
+            document.querySelectorAll('.scen-card').forEach((card, i) => {
+                if (i === idx) {
+                    card.classList.add('border-2', 'border-amber-400');
+                    card.classList.remove('border-slate-700');
+                } else {
+                    card.classList.remove('border-2', 'border-amber-400');
+                    card.classList.add('border-slate-700');
+                }
+            });
+            document.getElementById('selected-scen-prompt').innerHTML = `👈 أنت تحلل الآن: <strong>${scenarioTitles[idx]}</strong>`;
+            document.getElementById('defect-feedback').innerText = "";
+        }
+
+        function matchDefect(defectIdx) {
+            const fb = document.getElementById('defect-feedback');
+            if (defectIdx === activeScenario) {
+                if (!solvedScenarios[activeScenario]) {
+                    solvedScenarios[activeScenario] = true;
+                    addScore(25);
+                    const scenCard = document.getElementById('scen-' + activeScenario);
+                    scenCard.classList.add('bg-emerald-950/40');
+                    scenCard.querySelector('h4').innerHTML += ' <span class="text-emerald-400">✔ تم الحل</span>';
+                    document.getElementById('def-btn-' + defectIdx).classList.add('border-emerald-500', 'bg-emerald-950/30');
+                } else {
+                    playSound('coin');
+                }
+                fb.className = "text-center font-bold text-sm h-6 text-emerald-400";
+                fb.innerText = "✅ تشخيص اقتصادي دقيق! أحسنت.";
+
+                // Move to next unsolved scenario automatically
+                const nextUnsolved = solvedScenarios.findIndex(s => !s);
+                if (nextUnsolved !== -1) {
+                    setTimeout(() => selectDefectScenario(nextUnsolved), 900);
+                } else {
+                    playSound('fanfare');
+                    document.getElementById('stage-2-next').classList.remove('hidden');
+                }
+            } else {
+                playSound('error');
+                fb.className = "text-center font-bold text-sm h-6 text-red-400";
+                fb.innerText = "❌ هذا العيب لا ينطبق على الموقف المحدد، جرب خياراً آخر!";
+            }
+        }
+
+        // ================= STAGE 3: FUNCTIONS OF MONEY =================
+        const funcQuestions = [
+            {
+                q: "١/٤: دخلتَ متجراً إلكترونياً فوجدت الهاتف مكتوباً تحته (السعر: ٢٠٠٠ ريال) والسمّاعة (٢٠٠ ريال)، فعرفت فوراً أن الهاتف يعادل ١٠ سماعات.",
+                ans: "measure",
+                exp: "صحيح! النقود هنا تعمل كـ (مقياس للقيمة ووحدة حساب) لتسعير السلع ومقارنتها."
+            },
+            {
+                q: "٢/٤: باع صيادٌ سمكه مقابل نقود، ثم ذهب بالنقود واشترى خبزاً من الخباز ودواءً من الصيدلي دون الحاجة لأن يقبل الخبازُ السمك.",
+                ans: "medium",
+                exp: "رائع! النقود هنا عملت كـ (وسيط للتبادل) وفصلت عملية البيع عن الشراء."
+            },
+            {
+                q: "٣/٤: اقتطع موظفٌ جزءاً من راتبه الشهري ووضعه في حسابه البنكي أو في سبائك ذهبية ليشتري به منزلاً بعد ٥ سنوات.",
+                ans: "store",
+                exp: "أحسنت! النقود هنا تؤدي وظيفة (مخزن للقيمة وأداة للادخار) عبر الزمن."
+            },
+            {
+                q: "٤/٤: اشترى تاجر بضاعة اليوم واتفق مع المورّد على سداد ثمنها البالغ ١٠,٠٠٠ دينار بعد ستة أشهر.",
+                ans: "deferred",
+                exp: "ممتاز! هذه وظيفة النقود كـ (معيار للمدفوعات الآجلة وتسوية الديون المستقبلية)."
+            }
+        ];
+        let currentFuncIdx = 0;
+
+        function checkMoneyFunction(chosen) {
+            if (currentFuncIdx >= funcQuestions.length) return;
+            const current = funcQuestions[currentFuncIdx];
+            const fb = document.getElementById('func-feedback');
+
+            if (chosen === current.ans) {
+                addScore(25);
+                fb.className = "text-sm font-bold h-6 text-emerald-400";
+                fb.innerText = "✅ " + current.exp;
+                currentFuncIdx++;
+                setTimeout(() => {
+                    if (currentFuncIdx < funcQuestions.length) {
+                        document.getElementById('func-question-text').innerText = funcQuestions[currentFuncIdx].q;
+                        fb.innerText = "";
+                    } else {
+                        document.getElementById('func-question-text').innerText = "🎉 أتقنت جميع وظائف النقود الأربع بنجاح!";
+                        document.getElementById('stage-3-next').classList.remove('hidden');
+                        playSound('fanfare');
+                    }
+                }, 1400);
+            } else {
+                playSound('error');
+                fb.className = "text-sm font-bold h-6 text-red-400";
+                fb.innerText = "❌ ليست هذه الوظيفة المقصودة هنا، اقرأ المثال بتمعن!";
+            }
+        }
+
+        // ================= STAGE 4: FINAL QUIZ =================
+        const quizData = [
+            {
+                q: "ما هي العلاقة الصحيحة بين مفهومي (المال) و(النقد)؟",
+                options: [
+                    "كل مال هو نقد، وليس كل نقد مالاً",
+                    "كل نقد هو مال، وليس كل مال نقداً",
+                    "المال والنقد مترادفان تماماً بلا أي فرق",
+                    "العقارات والسيارات تُعد نقداً ولا تُعد مالاً"
+                ],
+                correct: 1,
+                exp: "المال أعم وأشمل (يشمل العقارات، السلع، والنقود)، بينما النقد يقتصر على العملات ووسائط التبادل."
+            },
+            {
+                q: "ماذا نُسمّي السلوك البشري المتمثل في حيازة الأشياء ذات القيمة وادخارها لوقت الحاجة؟",
+                options: [
+                    "المقايضة",
+                    "التموّل",
+                    "التضخم",
+                    "السيولة النقدية"
+                ],
+                correct: 1,
+                exp: "التموّل هو اتخاذ الشيء مالاً وإحرازه وادخاره للانتفاع به وقت الحاجة."
+            },
+            {
+                q: "أراد صاحب بقرة أن يشتري رغيف خبز واحد، فلم يستطع تقسيم البقرة الحية. هذا الموقف يوضح أحد عيوب المقايضة وهو:",
+                options: [
+                    "صعوبة توافق الرغبات",
+                    "عدم قابلية بعض السلع للتجزئة",
+                    "سهولة خزن القيمة",
+                    "قبول النقود العام"
+                ],
+                correct: 1,
+                exp: "الحيوانات الحية وبعض السلع الكبيرة تفقد قيمتها أو تهلك إذا جُزّئت."
+            },
+            {
+                q: "عندما نحتاج في نظام المقايضة إلى أن يرغب الطرف الأول بسلعة الطرف الثاني، ويرغب الثاني بسلعة الأول في نفس اللحظة، فهذا يُسمى:",
+                options: [
+                    "التوافق المزدوج للرغبات",
+                    "معيار المدفوعات الآجلة",
+                    "تلف السلع الاستهلاكية",
+                    "الاحتكار التجاري"
+                ],
+                correct: 0,
+                exp: "صعوبة تحقيق التوافق المزدوج للرغبات كان أكبر عائق أمام المقايضة."
+            },
+            {
+                q: "أي وظيفة من وظائف النقود عالجت مشكلة (تلف المحاصيل وصعوبة حفظ السلع للمستقبل)؟",
+                options: [
+                    "النقود كمقياس للقيمة",
+                    "النقود كمخزن للقيمة (أداة ادخار)",
+                    "عدم قابلية التجزئة",
+                    "المقايضة الثنائية"
+                ],
+                correct: 1,
+                exp: "النقود لا تتلف كالطماطم ولا تأخذ حيزاً ضخماً، لذا فهي مخزن ممتاز للقيمة."
+            },
+            {
+                q: "ما الخاصية الأساسية التي تمنح (النقد) قوته كوسيط للتبادل في المجتمع؟",
+                options: [
+                    "كونه قابلاً للأكل والشرب",
+                    "تمتعه بالقبول العام وثقة المجتمع والقانون",
+                    "صعوبة حمله ونقله من مكان لآخر",
+                    "عدم إمكانية تجزئته إلى فئات صغيرة"
+                ],
+                correct: 1,
+                exp: "القبول العام هو سر قوة النقد؛ فالناس يقبلونه لثقتهم بأن غيرهم سيقبله منهم مقابل أي سلعة."
+            }
+        ];
+
+        let currentQuizIdx = 0;
+        let quizCorrectCount = 0;
+        let quizAnswered = false;
+
+        function renderQuizQuestion() {
+            quizAnswered = false;
+            const qObj = quizData[currentQuizIdx];
+            document.getElementById('quiz-progress').innerText = `${currentQuizIdx + 1} / ${quizData.length}`;
+            document.getElementById('quiz-question').innerText = qObj.q;
+            document.getElementById('quiz-explanation').classList.add('hidden');
+            document.getElementById('next-quiz-btn').classList.add('hidden');
+
+            const optsContainer = document.getElementById('quiz-options');
+            optsContainer.innerHTML = '';
+
+            qObj.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-right p-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-semibold transition flex justify-between items-center";
+                btn.innerHTML = `<span>${optText}</span><span class="w-6 h-6 rounded-full border border-slate-500 flex items-center justify-center text-xs"></span>`;
+                btn.onclick = () => selectQuizAnswer(idx, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function selectQuizAnswer(selectedIdx, btnElement) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+
+            const qObj = quizData[currentQuizIdx];
+            const allBtns = document.getElementById('quiz-options').children;
+            const expEl = document.getElementById('quiz-explanation');
+
+            if (selectedIdx === qObj.correct) {
+                quizCorrectCount++;
+                addScore(40);
+                btnElement.className = "w-full text-right p-4 rounded-xl bg-emerald-600/30 border-2 border-emerald-400 font-bold flex justify-between items-center text-emerald-200";
+                btnElement.querySelector('span:last-child').innerText = '✔';
+                expEl.innerHTML = `<strong class="text-emerald-400">✅ إجابة رائعة!</strong> ${qObj.exp}`;
+            } else {
+                playSound('error');
+                btnElement.className = "w-full text-right p-4 rounded-xl bg-red-600/30 border-2 border-red-400 font-bold flex justify-between items-center text-red-200 shake";
+                btnElement.querySelector('span:last-child').innerText = '✖';
+                allBtns[qObj.correct].className = "w-full text-right p-4 rounded-xl bg-emerald-600/30 border-2 border-emerald-400 font-bold flex justify-between items-center text-emerald-200";
+                expEl.innerHTML = `<strong class="text-red-400">❌ إجابة غير دقيقة.</strong> ${qObj.exp}`;
+            }
+
+            expEl.classList.remove('hidden');
+            document.getElementById('next-quiz-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIdx++;
+            if (currentQuizIdx < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showCertificate();
+            }
+        }
+
+        function showCertificate() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const cert = document.getElementById('certificate-screen');
+            cert.classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-quiz-accuracy').innerText = `${quizCorrectCount} / ${quizData.length}`;
+            playSound('fanfare');
+            confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
+        }
+
+        function resetFullGame() {
+            score = 0;
+            document.getElementById('score-display').innerText = '0';
+            currentClassifyIndex = 0;
+            currentFuncIdx = 0;
+            currentQuizIdx = 0;
+            quizCorrectCount = 0;
+            playerInventory = { id: 'fish', name: '🐟 سمكة طازجة', icon: '🐟' };
+            barterStepsCount = 0;
+            solvedScenarios = [false, false, false, false];
+            location.reload();
+        }
+
+        // Initialize Quiz on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderQuizQuestion();
+        });
+    </script>
+</body>
+</html>
